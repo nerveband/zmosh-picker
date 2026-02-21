@@ -14,6 +14,26 @@
 
 ---
 
+## Development Environment
+
+**This is being built on a local macOS machine.** You have full access to:
+- Go toolchain (`go build`, `go test`, `go run`, `go vet`)
+- The local terminal for testing the built binary interactively
+- `zmosh` is installed on this machine — you can run `zmosh list` to see real sessions
+- `zoxide` and `fzf` are installed — test the zoxide integration with real data
+- Git for committing after each task
+
+**Build and test everything locally.** After each task, actually build the binary and run the tests. Don't just write code — verify it works. Run `go test ./... -v` and `go build -o zmosh-picker ./cmd/zmosh-picker` frequently.
+
+**When you need user input or a decision**, ask. Examples:
+- If the zmosh list output format doesn't match what the plan expects, show the actual output and ask how to handle it
+- If a dependency version has breaking API changes, present options
+- If a design decision in the plan seems wrong after seeing real behavior, flag it and propose alternatives
+- If tests fail in unexpected ways, show the output and ask before guessing at fixes
+- If you're unsure about UX details (key mappings, display formatting, error messages), ask rather than assume
+
+---
+
 ## Phase 1: Project Setup
 
 ### Task 1: Initialize Go Module
