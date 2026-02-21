@@ -43,9 +43,17 @@ func ListJSON() (string, error) {
 		Sessions: sessions,
 		Count:    len(sessions),
 	}
-	// Try to get zmosh version
+	// Try to get zmosh version (first line, last field: "zmosh\t\t0.4.0")
 	if v, err := exec.Command("zmosh", "version").Output(); err == nil {
-		result.ZmoshVersion = strings.TrimSpace(string(v))
+		ver := strings.TrimSpace(string(v))
+		if idx := strings.IndexByte(ver, '\n'); idx >= 0 {
+			ver = strings.TrimSpace(ver[:idx])
+		}
+		fields := strings.Fields(ver)
+		if len(fields) >= 2 {
+			ver = fields[len(fields)-1]
+		}
+		result.ZmoshVersion = ver
 	}
 	b, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {

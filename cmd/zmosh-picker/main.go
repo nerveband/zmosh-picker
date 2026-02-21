@@ -33,7 +33,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, "usage: zmosh-picker attach <name> [--dir <path>]")
 			os.Exit(1)
 		}
-		if err := runAttach(os.Args[2]); err != nil {
+		if err := runAttach(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "zmosh-picker: %v\n", err)
 			os.Exit(1)
 		}
@@ -61,14 +61,6 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-// Stubs — implemented in later tasks
-func runPicker() error              { fmt.Println("picker not yet implemented"); return nil }
-func runList() error                { fmt.Println("list not yet implemented"); return nil }
-func runCheck() error               { fmt.Println("check not yet implemented"); return nil }
-func runAttach(name string) error   { fmt.Printf("attach %s not yet implemented\n", name); return nil }
-func runKill(name string) error     { fmt.Printf("kill %s not yet implemented\n", name); return nil }
-func runInstallHook() error         { fmt.Println("install-hook not yet implemented"); return nil }
 
 func printUsage() {
 	fmt.Println(`zmosh-picker — session launcher for zmosh

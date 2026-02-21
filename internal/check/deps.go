@@ -53,7 +53,19 @@ func checkDep(name, versionFlag string) DepStatus {
 	}
 	status := DepStatus{Installed: true, Path: path}
 	if out, err := exec.Command(name, versionFlag).Output(); err == nil {
-		status.Version = strings.TrimSpace(string(out))
+		// Take only the first line (zmosh version outputs multiple lines)
+		ver := strings.TrimSpace(string(out))
+		if idx := strings.IndexByte(ver, '\n'); idx >= 0 {
+			ver = strings.TrimSpace(ver[:idx])
+		}
+		// For zmosh, extract just the version number from "zmosh\t\t0.4.0"
+		if name == "zmosh" {
+			fields := strings.Fields(ver)
+			if len(fields) >= 2 {
+				ver = fields[len(fields)-1]
+			}
+		}
+		status.Version = ver
 	}
 	return status
 }
