@@ -91,7 +91,7 @@ The picker skips itself when you're already inside a zmosh session, in a non-int
 
 ## Works on narrow screens
 
-The layout fits ~30 character widths. Action keys are stacked on two lines. No padding on session names. I built this mostly so I could SSH from my phone (Blink Shell) and not hate the experience.
+The layout fits ~30 character widths. Action keys are stacked on two lines. No padding on session names. I built this mostly so I could SSH from my phone (Echo) and not hate the experience.
 
 ## Related projects
 
