@@ -53,7 +53,7 @@ Open a new terminal and you should see it.
   3  ai-happy-design . ~/Doc/GH/ai-happy-design
 
   enter new myproject-1
-  z     pick dir  d +date  esc skip
+  z pick dir  d +date  k kill  esc skip
 
   >
 ```
@@ -67,6 +67,7 @@ Open a new terminal and you should see it.
 | `Enter` | New session in current directory |
 | `z` | Pick a directory with zoxide, then new session there |
 | `d` | New session with today's date as suffix |
+| `k` | Kill mode — pick a session to kill |
 | `Esc` | Skip, just give me a normal shell |
 
 Everything is single-press. No typing names, no confirming.
@@ -94,6 +95,14 @@ The picker skips itself when you're already inside a zmosh session, in a non-int
 ### `zpick`
 
 If you're already inside a session and want to switch, type `zpick`. It brings up the same picker, lets you pick a session, and attaches to it. The install script adds this alias automatically.
+
+### Killing sessions
+
+Press `k` to enter kill mode, then pick a session number to kill. You'll be asked to confirm with `y/n`. To skip confirmation, add this to your `.zshrc`:
+
+```bash
+export ZMOSH_PICKER_NO_CONFIRM=1
+```
 
 ## Works on narrow screens
 
