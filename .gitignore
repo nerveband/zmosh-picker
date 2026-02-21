@@ -1,0 +1,6 @@
+# Worktrees
+.worktrees/
+
+# Go build output
+zmosh-picker
+*.exe
