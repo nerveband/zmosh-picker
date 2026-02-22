@@ -71,7 +71,7 @@ func Run() (string, error) {
 	}
 
 	for {
-		sessions, err := zmosh.List()
+		sessions, err := zmosh.FastList()
 		if err != nil {
 			return "", fmt.Errorf("failed to list sessions: %w", err)
 		}

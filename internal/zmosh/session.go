@@ -83,6 +83,84 @@ func AttachInDir(name, dir string) error {
 	return Attach(name)
 }
 
+// resolveZmxDir finds the zmx socket directory.
+// Priority: $ZMX_DIR > $XDG_RUNTIME_DIR/zmx > $TMPDIR/zmx-{uid} > parse from zmosh/zmx version output.
+func resolveZmxDir() (string, error) {
+	if d := os.Getenv("ZMX_DIR"); d != "" {
+		return d, nil
+	}
+	if d := os.Getenv("XDG_RUNTIME_DIR"); d != "" {
+		candidate := d + "/zmx"
+		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+			return candidate, nil
+		}
+	}
+	if tmp := os.Getenv("TMPDIR"); tmp != "" {
+		candidate := fmt.Sprintf("%szmx-%d", tmp, os.Getuid())
+		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+			return candidate, nil
+		}
+	}
+	// Fallback: parse socket_dir from zmosh/zmx version output
+	for _, bin := range []string{"zmosh", "zmx"} {
+		out, err := exec.Command(bin, "version").Output()
+		if err != nil {
+			continue
+		}
+		for _, line := range strings.Split(string(out), "\n") {
+			if strings.HasPrefix(strings.TrimSpace(line), "socket_dir") {
+				fields := strings.Fields(line)
+				if len(fields) >= 2 {
+					return fields[len(fields)-1], nil
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("could not resolve zmx socket directory")
+}
+
+// fastListDir reads session names directly from socket files in the zmx directory.
+func fastListDir(dir string) ([]Session, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	active := os.Getenv("ZMX_SESSION")
+	var sessions []Session
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		if info.Mode().Type()&os.ModeSocket == 0 {
+			continue
+		}
+		sessions = append(sessions, Session{
+			Name:      e.Name(),
+			StartedIn: "~",
+			Active:    e.Name() == active,
+		})
+	}
+	return sessions, nil
+}
+
+// FastList returns sessions by reading socket files directly, bypassing zmosh list.
+// Falls back to List() if the socket directory cannot be resolved.
+func FastList() ([]Session, error) {
+	dir, err := resolveZmxDir()
+	if err != nil {
+		return List()
+	}
+	sessions, err := fastListDir(dir)
+	if err != nil {
+		return List()
+	}
+	return sessions, nil
+}
+
 // Kill runs `zmosh kill <name>`.
 // Output is suppressed; the picker displays its own status message.
 func Kill(name string) error {
