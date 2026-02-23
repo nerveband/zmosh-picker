@@ -130,7 +130,7 @@ func TestRemoveBlockStartOnly(t *testing.T) {
 func TestRemoveOldHook(t *testing.T) {
 	content := "# before\n# zpick: session launcher\n[[ -z \"$ZMX_SESSION\" ]] && command -v zpick &>/dev/null && eval \"$(zpick)\"\n# after\n"
 
-	result := removeOldHook(content)
+	result := removeOldHook(content, hookMarker)
 
 	if strings.Contains(result, hookMarker) {
 		t.Error("old hook marker should be removed")
@@ -143,6 +143,75 @@ func TestRemoveOldHook(t *testing.T) {
 	}
 	if !strings.Contains(result, "# after") {
 		t.Error("content after should remain")
+	}
+}
+
+func TestRemoveLegacyHook(t *testing.T) {
+	// v1.x zmosh-picker format (Go rewrite era)
+	content := "# before\n# zmosh-picker: session launcher\n[[ -z \"$ZMX_SESSION\" ]] && command -v zmosh-picker &>/dev/null && zmosh-picker\n# after\n"
+
+	result := removeOldHook(content, "zmosh-picker: session launcher")
+
+	if strings.Contains(result, "zmosh-picker") {
+		t.Error("legacy hook should be removed")
+	}
+	if !strings.Contains(result, "# before") {
+		t.Error("content before should remain")
+	}
+	if !strings.Contains(result, "# after") {
+		t.Error("content after should remain")
+	}
+}
+
+func TestRemoveLegacyInstallScriptHook(t *testing.T) {
+	// v1.0 install.sh format
+	content := "# before\n# zmosh-picker: auto-launch session picker\n[[ -z \"$ZMX_SESSION\" ]] && command -v zmosh-picker &>/dev/null && zmosh-picker\n# after\n"
+
+	result := removeOldHook(content, "zmosh-picker: auto-launch session picker")
+
+	if strings.Contains(result, "zmosh-picker") {
+		t.Error("legacy install.sh hook should be removed")
+	}
+	if !strings.Contains(result, "# before") {
+		t.Error("content before should remain")
+	}
+	if !strings.Contains(result, "# after") {
+		t.Error("content after should remain")
+	}
+}
+
+func TestHasHookDetectsAllGenerations(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "testrc")
+
+	// Gen 1: install.sh
+	os.WriteFile(path, []byte("# zmosh-picker: auto-launch session picker\nzmosh-picker\n"), 0644)
+	if !hasHook(path) {
+		t.Error("should detect gen 1 (install.sh) hook")
+	}
+
+	// Gen 2: Go rewrite
+	os.WriteFile(path, []byte("# zmosh-picker: session launcher\nzmosh-picker\n"), 0644)
+	if !hasHook(path) {
+		t.Error("should detect gen 2 (Go rewrite) hook")
+	}
+
+	// Gen 3: zpick rename
+	os.WriteFile(path, []byte("# zpick: session launcher\neval...\n"), 0644)
+	if !hasHook(path) {
+		t.Error("should detect gen 3 (zpick) hook")
+	}
+
+	// Gen 4: guard block
+	os.WriteFile(path, []byte(blockStart+"\nstuff\n"+blockEnd+"\n"), 0644)
+	if !hasHook(path) {
+		t.Error("should detect gen 4 (guard) hook")
+	}
+
+	// No hook
+	os.WriteFile(path, []byte("# just config\n"), 0644)
+	if hasHook(path) {
+		t.Error("should not detect hook when none present")
 	}
 }
 

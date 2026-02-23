@@ -9,8 +9,14 @@ import (
 	"github.com/nerveband/zpick/internal/guard"
 )
 
-// Old-style marker for migration
+// Old-style markers for migration (all generations)
 const hookMarker = "zpick: session launcher"
+
+// Legacy markers from before the rename (v1.x, zmosh-picker era)
+var legacyMarkers = []string{
+	"zmosh-picker: session launcher",
+	"zmosh-picker: auto-launch session picker",
+}
 
 // Block markers for new guard-based hook
 const (
@@ -108,10 +114,18 @@ func installShell(path string) error {
 		content = removeBlock(content)
 	}
 
-	// Migration: remove old-style hook marker if present
+	// Migration: remove old-style hook marker if present (v2.0+ zpick era)
 	if strings.Contains(content, hookMarker) {
-		content = removeOldHook(content)
+		content = removeOldHook(content, hookMarker)
 		fmt.Printf("  migrated old hook from %s\n", path)
+	}
+
+	// Migration: remove legacy hooks from v1.x zmosh-picker era
+	for _, marker := range legacyMarkers {
+		if strings.Contains(content, marker) {
+			content = removeOldHook(content, marker)
+			fmt.Printf("  migrated legacy zmosh-picker hook from %s\n", path)
+		}
 	}
 
 	// Append new block
@@ -166,19 +180,20 @@ func removeBlock(content string) string {
 	return before + after
 }
 
-// removeOldHook removes the old-style hook (comment + command line).
-func removeOldHook(content string) string {
+// removeOldHook removes an old-style hook (comment + command line) by marker.
+func removeOldHook(content string, marker string) string {
 	lines := strings.Split(content, "\n")
 	var result []string
 	skip := false
 	for _, line := range lines {
-		if strings.Contains(line, hookMarker) {
+		if strings.Contains(line, marker) {
 			skip = true
 			continue
 		}
 		if skip {
 			skip = false
-			if strings.Contains(line, "zpick") {
+			// Skip the command line that follows the marker comment
+			if strings.Contains(line, "zpick") || strings.Contains(line, "zmosh-picker") {
 				continue
 			}
 		}
@@ -195,14 +210,22 @@ func detectShell() string {
 	return "unknown"
 }
 
-// hasHook checks if any zpick hook (old or new style) is in the file.
+// hasHook checks if any zpick/zmosh-picker hook (any generation) is in the file.
 func hasHook(path string) bool {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return false
 	}
 	content := string(data)
-	return strings.Contains(content, hookMarker) || strings.Contains(content, blockStart)
+	if strings.Contains(content, hookMarker) || strings.Contains(content, blockStart) {
+		return true
+	}
+	for _, marker := range legacyMarkers {
+		if strings.Contains(content, marker) {
+			return true
+		}
+	}
+	return false
 }
 
 // isGhostty returns true if the current terminal is Ghostty.
@@ -252,8 +275,15 @@ func removeFromFile(path string) error {
 	hasOldHook := strings.Contains(content, hookMarker)
 	hasNewHook := strings.Contains(content, blockStart)
 	hasTermMarker := strings.Contains(content, termMarker)
+	hasLegacy := false
+	for _, marker := range legacyMarkers {
+		if strings.Contains(content, marker) {
+			hasLegacy = true
+			break
+		}
+	}
 
-	if !hasOldHook && !hasNewHook && !hasTermMarker {
+	if !hasOldHook && !hasNewHook && !hasTermMarker && !hasLegacy {
 		fmt.Printf("  hook not found in %s\n", path)
 		return nil
 	}
@@ -263,9 +293,16 @@ func removeFromFile(path string) error {
 		content = removeBlock(content)
 	}
 
-	// Remove old-style hook
+	// Remove old-style hook (v2.0+ zpick era)
 	if hasOldHook {
-		content = removeOldHook(content)
+		content = removeOldHook(content, hookMarker)
+	}
+
+	// Remove legacy hooks (v1.x zmosh-picker era)
+	for _, marker := range legacyMarkers {
+		if strings.Contains(content, marker) {
+			content = removeOldHook(content, marker)
+		}
 	}
 
 	// Remove TERM fix
