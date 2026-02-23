@@ -47,6 +47,9 @@ func GenerateHookBlock(apps []string) string {
 	b.WriteString(blockStart)
 	b.WriteByte('\n')
 
+	// Picker alias: eval the command zp outputs
+	b.WriteString("alias zp='eval \"$(command zp)\"'\n")
+
 	// Autorun: launch saved command when entering a new session
 	b.WriteString("# Auto-run: launch saved command when entering a new session\n")
 	b.WriteString("if [[ -n \"$ZPICK_AUTORUN\" ]]; then\n")

@@ -36,6 +36,9 @@ func GenerateFishHookBlock(apps []string) string {
 	b.WriteString(blockStart)
 	b.WriteByte('\n')
 
+	// Picker function: eval the command zp outputs
+	b.WriteString("function zp\n  eval (command zp)\nend\n")
+
 	// Autorun
 	b.WriteString("# Auto-run: launch saved command when entering a new session\n")
 	b.WriteString("if test -n \"$ZPICK_AUTORUN\"\n")
