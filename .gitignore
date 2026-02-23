@@ -1,6 +1,9 @@
 # Worktrees
 .worktrees/
 
+# Agent data
+/agents/
+
 # Go build output
 /zpick
 /zmosh-picker
