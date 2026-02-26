@@ -70,6 +70,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "zp: %v\n", err)
 			os.Exit(1)
 		}
+	case "resume":
+		if err := runResume(); err != nil {
+			fmt.Fprintf(os.Stderr, "zp: %v\n", err)
+			os.Exit(1)
+		}
 	case "install-hook":
 		if err := runInstallHook(); err != nil {
 			fmt.Fprintf(os.Stderr, "zp: %v\n", err)
@@ -119,7 +124,7 @@ func shouldCheckUpdates(args []string) bool {
 		return false
 	}
 	switch args[0] {
-	case "version", "upgrade", "--help", "-h", "help", "guard", "autorun":
+	case "version", "upgrade", "--help", "-h", "help", "guard", "autorun", "resume":
 		return false
 	}
 	for _, arg := range args[1:] {
