@@ -57,6 +57,9 @@ func Run(b backend.Backend, version string) (string, error) {
 		currentSession = b.CurrentSessionName()
 	}
 
+	// Load key mode preference (letters-first or numbers-first)
+	LoadKeyMode(backend.ReadKeyMode())
+
 	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
 	if err != nil {
 		return "", nil
