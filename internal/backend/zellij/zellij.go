@@ -26,6 +26,10 @@ func (z *Zellij) InSession() bool {
 	return os.Getenv("ZELLIJ") != ""
 }
 
+func (z *Zellij) CurrentSessionName() string {
+	return os.Getenv("ZELLIJ_SESSION_NAME")
+}
+
 func (z *Zellij) Available() (bool, error) {
 	_, err := exec.LookPath("zellij")
 	if err != nil {

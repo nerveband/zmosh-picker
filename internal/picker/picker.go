@@ -54,7 +54,7 @@ func Run(b backend.Backend, version string) (string, error) {
 	inSession := b.InSession() && os.Getenv("ZPICK") == ""
 	var currentSession string
 	if inSession {
-		currentSession = os.Getenv(b.SessionEnvVar())
+		currentSession = b.CurrentSessionName()
 	}
 
 	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)

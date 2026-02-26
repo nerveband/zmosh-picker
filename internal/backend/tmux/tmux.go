@@ -27,6 +27,14 @@ func (t *Tmux) InSession() bool {
 	return os.Getenv("TMUX") != ""
 }
 
+func (t *Tmux) CurrentSessionName() string {
+	out, err := exec.Command("tmux", "display-message", "-p", "#S").Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(out))
+}
+
 func (t *Tmux) Available() (bool, error) {
 	_, err := exec.LookPath("tmux")
 	if err != nil {

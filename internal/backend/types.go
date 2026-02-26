@@ -23,6 +23,7 @@ type Backend interface {
 
 	// Probing
 	InSession() bool
+	CurrentSessionName() string // name of current session (empty if not in one)
 	Available() (bool, error)
 	Version() (string, error)
 

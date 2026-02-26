@@ -31,6 +31,10 @@ func (z *Zmosh) InSession() bool {
 	return os.Getenv("ZMX_SESSION") != ""
 }
 
+func (z *Zmosh) CurrentSessionName() string {
+	return os.Getenv("ZMX_SESSION")
+}
+
 func (z *Zmosh) Available() (bool, error) {
 	_, err := exec.LookPath("zmosh")
 	if err != nil {

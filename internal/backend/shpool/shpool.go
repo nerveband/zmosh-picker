@@ -26,6 +26,10 @@ func (s *Shpool) InSession() bool {
 	return os.Getenv("SHPOOL_SESSION_NAME") != ""
 }
 
+func (s *Shpool) CurrentSessionName() string {
+	return os.Getenv("SHPOOL_SESSION_NAME")
+}
+
 func (s *Shpool) Available() (bool, error) {
 	_, err := exec.LookPath("shpool")
 	if err != nil {
