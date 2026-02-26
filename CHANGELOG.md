@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.7.0
+
+- **In-session switching** — run `zp` inside an active session to switch, create, or kill sessions without remembering backend-specific detach commands. Works with all backends (tmux, zellij, zmosh, zmx, shpool).
+- **Current session marker** — when inside a session, the picker header shows `(in: name ←)` and marks your current session with `←` in the session list.
+- **System PATH symlink** — `zp install-hook` creates a `/usr/local/bin/zp` symlink so `mosh host -- zp` works out of the box. Prints a `sudo` hint if permissions require it.
+- **Guard block is optional** — the shell hook no longer includes guard wrappers by default. Only added if `~/.config/zpick/guard.conf` exists with apps listed.
+- **`zp resume` subcommand** — internal command used by shell hooks to handle switch-target handoff after detaching.
+
 ## v2.0.0
 
 - **Renamed to zpick** — binary, module, config dir all renamed from `zmosh-picker` to `zpick`

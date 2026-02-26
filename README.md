@@ -8,7 +8,7 @@ A single-keypress session picker that works with multiple terminal session manag
 
 ## What it does
 
-zp gives you a fast TUI for listing, creating, attaching, and killing sessions. It doesn't care which session manager you use. Pick whichever you like:
+zp gives you a fast TUI for listing, creating, attaching, and killing sessions — even from inside an existing session. It doesn't care which session manager you use. Pick whichever you like:
 
 | Backend | What it is |
 |---------|-----------|
@@ -36,7 +36,9 @@ After installing, add the shell hook:
 zp install-hook
 ```
 
-This detects your shell (zsh, bash, or fish) and adds a small block to your config. The hook does two things: it wraps `zp` so the picker output gets eval'd correctly, and it sets up the session guard (more on that below).
+This detects your shell (zsh, bash, or fish) and adds a small block to your config. The hook wraps `zp` so the picker output gets eval'd correctly, sets up autorun, and enables in-session switching.
+
+On macOS, `install-hook` also creates a `/usr/local/bin/zp` symlink so `zp` is in the system PATH (needed for `mosh host -- zp`). If it can't create the symlink (permissions), it prints the `sudo` command to run.
 
 To remove the hook:
 
@@ -71,6 +73,15 @@ zp guard --list            # see what's guarded
 ```
 
 After changing the list, re-run `zp install-hook` to update the shell functions.
+
+## In-session switching
+
+Run `zp` inside an active session and it detects you're already in one. The header shows which session you're in (marked with `←`), and picking a different session auto-detaches and reattaches — no need to remember backend-specific detach commands or shortcuts.
+
+This works across all backends. The flow:
+1. You're in session `api-server`, run `zp`
+2. Pick `frontend` (or create a new session)
+3. zp detaches from `api-server` and attaches to `frontend`
 
 ## Keys
 

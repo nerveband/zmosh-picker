@@ -9,19 +9,24 @@ import (
 const symlinkPath = "/usr/local/bin/zp"
 
 // InstallSymlink creates a symlink from /usr/local/bin/zp to ~/.local/bin/zp.
-// Prints a sudo hint if permissions deny it.
+// Skips if the symlink already points to the right place.
+// Prints a sudo hint if permissions deny creation.
 func InstallSymlink() {
 	home, _ := os.UserHomeDir()
 	target := filepath.Join(home, ".local", "bin", "zp")
 
-	// Check target exists
+	// Check target binary exists
 	if _, err := os.Stat(target); os.IsNotExist(err) {
 		return
 	}
 
-	// Remove old symlink if it exists (may point elsewhere)
-	os.Remove(symlinkPath)
+	// If symlink already points to the right place, nothing to do
+	if dest, err := os.Readlink(symlinkPath); err == nil && dest == target {
+		return
+	}
 
+	// Try to create (or replace) the symlink
+	os.Remove(symlinkPath) // remove stale symlink if any; ok to fail
 	if err := os.Symlink(target, symlinkPath); err != nil {
 		fmt.Printf("  note: run 'sudo ln -sf %s %s' for system-wide PATH\n", target, symlinkPath)
 		return
