@@ -60,6 +60,15 @@ func GenerateHookBlock(apps []string) string {
 	b.WriteString("  precmd_functions+=(_zpick_autorun)\n")
 	b.WriteString("fi\n")
 
+	// Switch-target: resume after in-session detach
+	b.WriteString("if [[ -f \"$HOME/.cache/zpick/switch-target\" ]]; then\n")
+	b.WriteString("  _zpick_switch() {\n")
+	b.WriteString("    precmd_functions=(${precmd_functions:#_zpick_switch})\n")
+	b.WriteString("    eval \"$(command zp resume)\"\n")
+	b.WriteString("  }\n")
+	b.WriteString("  precmd_functions+=(_zpick_switch)\n")
+	b.WriteString("fi\n")
+
 	// Guard function — checks ALL backend session env vars
 	envCheck := sessionEnvCheck()
 	b.WriteString("_zpick_guard() {\n")

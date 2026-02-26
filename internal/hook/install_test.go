@@ -463,3 +463,28 @@ func TestRemoveFromFileNotFound(t *testing.T) {
 	}
 	// Should print "not found" message but not error
 }
+
+func TestGenerateHookBlockContainsSwitchTarget(t *testing.T) {
+	block := GenerateHookBlock([]string{"claude"})
+
+	if !strings.Contains(block, "switch-target") {
+		t.Error("block should contain switch-target check")
+	}
+	if !strings.Contains(block, "_zpick_switch") {
+		t.Error("block should contain _zpick_switch function")
+	}
+	if !strings.Contains(block, "zp resume") {
+		t.Error("block should reference zp resume command")
+	}
+}
+
+func TestGenerateFishHookBlockContainsSwitchTarget(t *testing.T) {
+	block := GenerateFishHookBlock([]string{"claude"})
+
+	if !strings.Contains(block, "switch-target") {
+		t.Error("fish block should contain switch-target check")
+	}
+	if !strings.Contains(block, "zp resume") {
+		t.Error("fish block should reference zp resume command")
+	}
+}

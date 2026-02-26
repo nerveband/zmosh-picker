@@ -46,6 +46,11 @@ func GenerateFishHookBlock(apps []string) string {
 	b.WriteString("  set -e ZPICK_AUTORUN\n")
 	b.WriteString("end\n")
 
+	// Switch-target: resume after in-session detach
+	b.WriteString("if test -f \"$HOME/.cache/zpick/switch-target\"\n")
+	b.WriteString("  eval (command zp resume)\n")
+	b.WriteString("end\n")
+
 	// Guard function
 	envCheck := fishSessionEnvCheck()
 	b.WriteString("function _zpick_guard\n")
