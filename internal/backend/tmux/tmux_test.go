@@ -63,6 +63,15 @@ func TestTmuxAttachCommandWithDir(t *testing.T) {
 	}
 }
 
+func TestTmuxDetachCommand(t *testing.T) {
+	b := New()
+	got := b.DetachCommand()
+	want := "tmux detach-client"
+	if got != want {
+		t.Errorf("DetachCommand() = %q, want %q", got, want)
+	}
+}
+
 func TestParseTmuxSessions(t *testing.T) {
 	output := "work\t1\t/home/user/work\nplay\t0\t/home/user/play\n"
 	sessions := parseTmuxSessions(output)

@@ -71,6 +71,8 @@ func (z *Zellij) Attach(name string) error {
 	return backend.ExecCommand(zellijPath, []string{"zellij", "attach", name})
 }
 
+func (z *Zellij) DetachCommand() string { return "zellij action detach" }
+
 func (z *Zellij) AttachCommand(name, dir string) string {
 	cmd := fmt.Sprintf(`zellij attach "%s"`, name)
 	if dir != "" {

@@ -82,6 +82,8 @@ func (z *Zmx) Attach(name string) error {
 	return backend.ExecCommand(zmxPath, []string{"zmx", "attach", name})
 }
 
+func (z *Zmx) DetachCommand() string { return "zmx detach" }
+
 func (z *Zmx) AttachCommand(name, dir string) string {
 	cmd := fmt.Sprintf(`zmx attach "%s"`, name)
 	if dir != "" {

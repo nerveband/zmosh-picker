@@ -37,6 +37,15 @@ func TestZmxInSession(t *testing.T) {
 	}
 }
 
+func TestZmxDetachCommand(t *testing.T) {
+	b := New()
+	got := b.DetachCommand()
+	want := "zmx detach"
+	if got != want {
+		t.Errorf("DetachCommand() = %q, want %q", got, want)
+	}
+}
+
 func TestZmxAttachCommand(t *testing.T) {
 	b := New()
 	cmd := b.AttachCommand("my-session", "")

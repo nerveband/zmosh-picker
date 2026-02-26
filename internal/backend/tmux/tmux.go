@@ -74,6 +74,8 @@ func (t *Tmux) Attach(name string) error {
 	return backend.ExecCommand(tmuxPath, []string{"tmux", "new-session", "-A", "-s", name})
 }
 
+func (t *Tmux) DetachCommand() string { return "tmux detach-client" }
+
 func (t *Tmux) AttachCommand(name, dir string) string {
 	if dir != "" {
 		return fmt.Sprintf(`tmux new-session -A -s "%s" -c "%s"`, name, dir)

@@ -94,6 +94,15 @@ func TestZmoshAttachCommandUDPNoHost(t *testing.T) {
 	}
 }
 
+func TestZmoshDetachCommand(t *testing.T) {
+	b := New()
+	got := b.DetachCommand()
+	want := "zmx detach"
+	if got != want {
+		t.Errorf("DetachCommand() = %q, want %q", got, want)
+	}
+}
+
 func TestParseSessions(t *testing.T) {
 	input := "  session_name=apcsp-1\tpid=1234\tclients=1\tcreated_at=1771652262707138000\ttask_ended_at=0\ttask_exit_code=0\tstarted_in=~/GitHub/apcsp\n" +
 		"  session_name=bbcli\tpid=5678\tclients=0\tcreated_at=1771642928511196000\ttask_ended_at=0\ttask_exit_code=0\tstarted_in=~/Documents/GitHub/agent-to-bricks\n"

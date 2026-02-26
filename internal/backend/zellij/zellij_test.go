@@ -64,6 +64,15 @@ func TestZellijAttachCommandWithDir(t *testing.T) {
 	}
 }
 
+func TestZellijDetachCommand(t *testing.T) {
+	b := New()
+	got := b.DetachCommand()
+	want := "zellij action detach"
+	if got != want {
+		t.Errorf("DetachCommand() = %q, want %q", got, want)
+	}
+}
+
 func TestParseSessionsBasic(t *testing.T) {
 	input := "work\nplay\n"
 	sessions := parseSessions(input)

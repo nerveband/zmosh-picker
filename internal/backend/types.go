@@ -31,6 +31,7 @@ type Backend interface {
 	FastList() ([]Session, error)
 	Attach(name string) error
 	AttachCommand(name, dir string) string
+	DetachCommand() string
 	Kill(name string) error
 }
 

@@ -67,6 +67,8 @@ func (s *Shpool) Attach(name string) error {
 	return backend.ExecCommand(shpoolPath, []string{"shpool", "attach", name})
 }
 
+func (s *Shpool) DetachCommand() string { return "shpool detach" }
+
 func (s *Shpool) AttachCommand(name, dir string) string {
 	cmd := fmt.Sprintf(`shpool attach "%s"`, name)
 	if dir != "" {

@@ -45,6 +45,15 @@ func TestShpoolInSessionFalse(t *testing.T) {
 	}
 }
 
+func TestShpoolDetachCommand(t *testing.T) {
+	b := New()
+	got := b.DetachCommand()
+	want := "shpool detach"
+	if got != want {
+		t.Errorf("DetachCommand() = %q, want %q", got, want)
+	}
+}
+
 func TestShpoolAttachCommand(t *testing.T) {
 	b := New()
 	cmd := b.AttachCommand("my-session", "")
