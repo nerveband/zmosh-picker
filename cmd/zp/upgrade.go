@@ -1,9 +1,14 @@
 package main
 
 import (
+	"github.com/nerveband/zpick/internal/hook"
 	"github.com/nerveband/zpick/internal/update"
 )
 
 func runUpgrade() error {
-	return update.Upgrade(version)
+	err := update.Upgrade(version)
+	if err == nil {
+		hook.CheckSymlink()
+	}
+	return err
 }

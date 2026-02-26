@@ -96,18 +96,23 @@ func GenerateHookBlock(apps []string) string {
 // Install adds the zpick guard hook to the appropriate shell config file.
 func Install() error {
 	shell := detectShell()
+	var err error
 	switch shell {
 	case "zsh":
-		return installShell(zshrcPath())
+		err = installShell(zshrcPath())
 	case "bash":
-		return installShell(bashrcPath())
+		err = installShell(bashrcPath())
 	case "fish":
-		return installFish()
+		err = installFish()
 	default:
 		apps, _ := guard.ReadConfig()
 		block := GenerateHookBlock(apps)
 		return fmt.Errorf("unsupported shell: %s\nManually add this to your shell config:\n\n%s", shell, block)
 	}
+	if err == nil {
+		InstallSymlink()
+	}
+	return err
 }
 
 // Remove removes the zpick hook from the shell config file.
