@@ -69,24 +69,25 @@ func GenerateHookBlock(apps []string) string {
 	b.WriteString("  precmd_functions+=(_zpick_switch)\n")
 	b.WriteString("fi\n")
 
-	// Guard function — checks ALL backend session env vars
-	envCheck := sessionEnvCheck()
-	b.WriteString("_zpick_guard() {\n")
-	fmt.Fprintf(&b, "  if [[ %s ]] && command -v zp &>/dev/null; then\n", envCheck)
-	b.WriteString("    local _r\n")
-	b.WriteString("    _r=$(command zp guard -- \"$@\")\n")
-	b.WriteString("    if [[ -n \"$_r\" ]]; then eval \"$_r\"; return; fi\n")
-	b.WriteString("  fi\n")
-	b.WriteString("  command \"$@\"\n")
-	b.WriteString("}\n")
+	// Guard function + per-app wrappers (optional — only if apps configured)
+	if len(apps) > 0 {
+		envCheck := sessionEnvCheck()
+		b.WriteString("_zpick_guard() {\n")
+		fmt.Fprintf(&b, "  if [[ %s ]] && command -v zp &>/dev/null; then\n", envCheck)
+		b.WriteString("    local _r\n")
+		b.WriteString("    _r=$(command zp guard -- \"$@\")\n")
+		b.WriteString("    if [[ -n \"$_r\" ]]; then eval \"$_r\"; return; fi\n")
+		b.WriteString("  fi\n")
+		b.WriteString("  command \"$@\"\n")
+		b.WriteString("}\n")
 
-	// Per-app shell functions
-	for _, app := range apps {
-		if err := guard.ValidateName(app); err != nil {
-			continue
+		for _, app := range apps {
+			if err := guard.ValidateName(app); err != nil {
+				continue
+			}
+			fname := guard.FuncName(app)
+			fmt.Fprintf(&b, "%s() { _zpick_guard %s \"$@\"; }\n", fname, app)
 		}
-		fname := guard.FuncName(app)
-		fmt.Fprintf(&b, "%s() { _zpick_guard %s \"$@\"; }\n", fname, app)
 	}
 
 	b.WriteString(blockEnd)
@@ -130,13 +131,12 @@ func Remove() error {
 	}
 }
 
-// installShell installs the guard block into a shell config file.
+// installShell installs the hook block into a shell config file.
+// Guard wrappers are only included if guard.conf exists with apps listed.
 func installShell(path string) error {
-	guard.EnsureConfig()
-
-	apps, err := guard.ReadConfig()
-	if err != nil {
-		return fmt.Errorf("cannot read guard config: %w", err)
+	var apps []string
+	if _, err := os.Stat(guard.ConfigPath()); err == nil {
+		apps, _ = guard.ReadConfig()
 	}
 
 	data, _ := os.ReadFile(path)

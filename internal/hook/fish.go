@@ -51,26 +51,27 @@ func GenerateFishHookBlock(apps []string) string {
 	b.WriteString("  eval (command zp resume)\n")
 	b.WriteString("end\n")
 
-	// Guard function
-	envCheck := fishSessionEnvCheck()
-	b.WriteString("function _zpick_guard\n")
-	fmt.Fprintf(&b, "  if %s; and command -v zp &>/dev/null\n", envCheck)
-	b.WriteString("    set -l _r (command zp guard -- $argv)\n")
-	b.WriteString("    if test -n \"$_r\"\n")
-	b.WriteString("      eval $_r\n")
-	b.WriteString("      return\n")
-	b.WriteString("    end\n")
-	b.WriteString("  end\n")
-	b.WriteString("  command $argv\n")
-	b.WriteString("end\n")
+	// Guard function + per-app wrappers (optional — only if apps configured)
+	if len(apps) > 0 {
+		envCheck := fishSessionEnvCheck()
+		b.WriteString("function _zpick_guard\n")
+		fmt.Fprintf(&b, "  if %s; and command -v zp &>/dev/null\n", envCheck)
+		b.WriteString("    set -l _r (command zp guard -- $argv)\n")
+		b.WriteString("    if test -n \"$_r\"\n")
+		b.WriteString("      eval $_r\n")
+		b.WriteString("      return\n")
+		b.WriteString("    end\n")
+		b.WriteString("  end\n")
+		b.WriteString("  command $argv\n")
+		b.WriteString("end\n")
 
-	// Per-app functions
-	for _, app := range apps {
-		if err := guard.ValidateName(app); err != nil {
-			continue
+		for _, app := range apps {
+			if err := guard.ValidateName(app); err != nil {
+				continue
+			}
+			fname := guard.FuncName(app)
+			fmt.Fprintf(&b, "function %s\n  _zpick_guard %s $argv\nend\n", fname, app)
 		}
-		fname := guard.FuncName(app)
-		fmt.Fprintf(&b, "function %s\n  _zpick_guard %s $argv\nend\n", fname, app)
 	}
 
 	b.WriteString(blockEnd)
@@ -78,12 +79,11 @@ func GenerateFishHookBlock(apps []string) string {
 }
 
 // installFish installs the fish hook to conf.d/.
+// Guard wrappers are only included if guard.conf exists with apps listed.
 func installFish() error {
-	guard.EnsureConfig()
-
-	apps, err := guard.ReadConfig()
-	if err != nil {
-		return fmt.Errorf("cannot read guard config: %w", err)
+	var apps []string
+	if _, err := os.Stat(guard.ConfigPath()); err == nil {
+		apps, _ = guard.ReadConfig()
 	}
 
 	path := fishConfigPath()
