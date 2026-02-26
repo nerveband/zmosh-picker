@@ -63,3 +63,52 @@ func TestKeyCharsNoDuplicates(t *testing.T) {
 		seen[k] = true
 	}
 }
+
+func TestLoadKeyMode_Numbers(t *testing.T) {
+	LoadKeyMode("numbers")
+	if KeyForIndex(0) != '1' {
+		t.Errorf("numbers mode: index 0 should be '1', got '%c'", KeyForIndex(0))
+	}
+	if KeyForIndex(9) != 'a' {
+		t.Errorf("numbers mode: index 9 should be 'a', got '%c'", KeyForIndex(9))
+	}
+}
+
+func TestLoadKeyMode_Letters(t *testing.T) {
+	LoadKeyMode("letters")
+	defer LoadKeyMode("numbers")
+
+	if KeyForIndex(0) != 'a' {
+		t.Errorf("letters mode: index 0 should be 'a', got '%c'", KeyForIndex(0))
+	}
+	if KeyForIndex(2) != 'd' {
+		t.Errorf("letters mode: index 2 should be 'd', got '%c'", KeyForIndex(2))
+	}
+	_, ok := IndexForKey('1')
+	if !ok {
+		t.Error("letters mode: '1' should still be a valid key")
+	}
+}
+
+func TestLoadKeyMode_LettersSkipsReserved(t *testing.T) {
+	LoadKeyMode("letters")
+	defer LoadKeyMode("numbers")
+
+	_, ok := IndexForKey('c')
+	if ok {
+		t.Error("'c' should still be reserved in letters mode")
+	}
+	_, ok = IndexForKey('k')
+	if ok {
+		t.Error("'k' should still be reserved in letters mode")
+	}
+}
+
+func TestLoadKeyMode_LettersMaxSessions(t *testing.T) {
+	LoadKeyMode("letters")
+	defer LoadKeyMode("numbers")
+
+	if MaxSessions != 32 {
+		t.Errorf("expected 32 max sessions in letters mode, got %d", MaxSessions)
+	}
+}
